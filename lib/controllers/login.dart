@@ -1,7 +1,7 @@
 class LoginController {
  bool validate (String username, String password) {
    // Lógica simples de validação
-   if (username == 'admin@example.com' && password == 'password123') {
+   if (username == 'root' && password == 'root') {
      return true;
    }
    return false;

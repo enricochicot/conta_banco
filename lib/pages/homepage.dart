@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key, required this.titulo});
+  // Mantivemos o construtor 'titulo' para não quebrar seu código de Login
+  const HomePage({super.key, required this.titulo}); 
   final String titulo;
 
   @override
@@ -9,107 +10,101 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // 1. Lista de Tarefas (Memória da tela)
+  final List<String> _tarefas = [];
+  
+  // 2. Controlador para ler o texto digitado
+  final TextEditingController recebeAnotacao = TextEditingController();
+
+  // Função que adiciona a tarefa na lista
+  void _adicionarTarefa() {
+    if (recebeAnotacao.text.isNotEmpty) {
+      setState(() {
+        _tarefas.add(recebeAnotacao.text); // Adiciona na lista
+        recebeAnotacao.clear(); // Limpa o campo de digitação
+      });
+    }
+  }
+
+  // Função para remover tarefa ao clicar na lixeira
+  void _removerTarefa(int index) {
+    setState(() {
+      _tarefas.removeAt(index);
+    });
+  }
+
+  void _removerTudo() {
+    setState(() {
+      _tarefas.clear();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Meu Banco"),
-        backgroundColor: Colors.deepPurple, // Cor do Nubank/Inter
-        foregroundColor: Colors.white, // Cor do texto
+        // Usa o título que veio da tela de Login (ex: "Página Inicial")
+        title: Text(widget.titulo), 
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0), // Espaço nas bordas da tela
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, // Alinha tudo à esquerda
-          children: [
-            
-            // 1. ÁREA DO SALDO (Um cartão simples)
-            const Text("Seu Saldo:", style: TextStyle(fontSize: 16, color: Colors.grey)),
-            const SizedBox(height: 10),
-            
-            const Text(
-              "R\$ 1.250,00", 
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-            ),
-            
-            const SizedBox(height: 30), // Espaço para separar
-
-            // 2. BOTÕES DE AÇÃO (Pix, Pagar, etc)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween, // Espalha os botões
+      body: Column(
+        children: [
+          // --- PARTE DE CIMA: CAMPO DE TEXTO E BOTÃO ---
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
               children: [
-                // Botão 1
-                Column(
-                  children: const [
-                    Icon(Icons.pix, size: 40, color: Colors.deepPurple),
-                    Text("Pix")
-                  ],
+                Expanded(
+                  child: TextField(
+                    controller: recebeAnotacao,
+                    decoration: const InputDecoration(
+                      labelText: 'Nova Tarefa',
+                      hintText: 'Ex: Estudar Flutter',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
                 ),
-                // Botão 2
-                Column(
-                  children: const [
-                    Icon(Icons.qr_code, size: 40, color: Colors.deepPurple),
-                    Text("Pagar")
-                  ],
-                ),
-                // Botão 3
-                Column(
-                  children: const [
-                    Icon(Icons.attach_money, size: 40, color: Colors.deepPurple),
-                    Text("Transferir")
-                  ],
-                ),
-                // Botão 4
-                Column(
-                  children: const [
-                    Icon(Icons.receipt, size: 40, color: Colors.deepPurple),
-                    Text("Boletos")
-                  ],
+                const SizedBox(width: 10),
+                FloatingActionButton(
+                  onPressed: _adicionarTarefa,
+                  backgroundColor: Colors.deepPurple,
+                  child: const Icon(Icons.add, color: Colors.white),
+                  mini: true, // Deixa o botão um pouco menor
                 ),
               ],
             ),
+          ),
 
-            const SizedBox(height: 40), // Espaço grande
-
-            // 3. LISTA DE MOVIMENTAÇÕES (Extrato)
-            const Text(
-              "Histórico Recente", 
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-
-            // Item 1
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.shopping_bag, color: Colors.red), // Ícone na esquerda
-                title: const Text("Supermercado"),
-                subtitle: const Text("Compra no débito"),
-                trailing: const Text("- R\$ 150,00", style: TextStyle(color: Colors.red)), // Valor na direita
-              ),
-            ),
-
-            // Item 2
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.work, color: Colors.green),
-                title: const Text("Salário"),
-                subtitle: const Text("Recebido de Empresa X"),
-                trailing: const Text("+ R\$ 2.500,00", style: TextStyle(color: Colors.green)),
-              ),
-            ),
-
-            // Item 3
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.fastfood, color: Colors.red),
-                title: const Text("Lanchonete"),
-                subtitle: const Text("Pix enviado"),
-                trailing: const Text("- R\$ 35,00", style: TextStyle(color: Colors.red)),
-              ),
-            ),
-
-          ],
-        ),
+          // --- PARTE DE BAIXO: LISTA DE ITENS ---
+          Expanded(
+            child: _tarefas.isEmpty
+                ? const Center(child: Text("Nenhuma tarefa ainda...")) // Se estiver vazio
+                : ListView.builder(
+                    itemCount: _tarefas.length,
+                    itemBuilder: (context, index) {
+                      return Card(
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        elevation: 2,
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: Colors.deepPurple[100],
+                            child: Text("${index + 1}"),
+                          ),
+                          title: Text(
+                            _tarefas[index],
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _removerTarefa(index),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
       ),
     );
   }

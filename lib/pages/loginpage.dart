@@ -1,6 +1,6 @@
 import 'package:conta_banco/pages/homepage.dart';
 import 'package:flutter/material.dart';
-import 'package:conta_banco/controllers/logincontroller.dart';
+import 'package:conta_banco/controllers/login.dart';
 
 // A Tela Principal (Que tem movimento/estado)
 class MinhaPaginaPrincipal extends StatefulWidget {
